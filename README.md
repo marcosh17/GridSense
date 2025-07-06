@@ -21,6 +21,8 @@ The project is designed for energy forecasting, intelligent monitoring, and esti
 - **Our World in Data (CO₂)** – emission factors and global stats  
   → https://ourworldindata.org/co2-and-other-greenhouse-gas-emissions
 
+- **Solcast (solar forecast)** – solar radiation forecasts and historical estimates  
+  → https://toolkit.solcast.com/
 ---
 
 ## 🚀 Getting Started
