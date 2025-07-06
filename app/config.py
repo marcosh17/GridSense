@@ -11,5 +11,9 @@ if not ESIOS_TOKEN:
     raise EnvironmentError("ESIOS_TOKEN is not set in the .env file")
 
 DEFAULT_LOCATION = "madrid"
-LATITUDE = LOCATIONS[DEFAULT_LOCATION]["lat"]
-LONGITUDE = LOCATIONS[DEFAULT_LOCATION]["lon"]
+
+def get_coordinates(city: str):
+    city = city.lower()
+    if city not in LOCATIONS:
+        raise ValueError(f"City '{city}' not found in locations dictionary.")
+    return LOCATIONS[city]["lat"], LOCATIONS[city]["lon"]
