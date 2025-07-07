@@ -39,7 +39,8 @@ def extract_openmeteo(location: str):
         df_radiation = get_radiation_data(lat, lon, start, end)
         df_merged = pd.merge(df_weather, df_radiation, on="time", how="outer")
 
-        output_path = Path("data") / f"openmeteo_{location.lower()}_{start}.csv"
+        output_path = Path("data") / location.lower() / f"openmeteo_{start}.csv"
+        output_path.parent.mkdir(parents=True, exist_ok=True)
         df_merged.to_csv(output_path, index=False)
         print(f"✅ Weather data saved to {output_path}")
     except requests.exceptions.HTTPError as e:
