@@ -3,43 +3,44 @@ import pandas as pd
 from pathlib import Path
 from app.config import get_coordinates
 
-def extract_nasa_power(location: str, start: str, end: str):
-    print(f"🌍 Fetching NASA POWER data for {location.title()} ({start} to {end})...")
+def extract_nasa_data(location: str, start_date: str, end_date: str):
+    """Download daily data from NASA POWER and save to data/<city>/raw/."""
+    print(f"🚀 Fetching NASA POWER data for {location.title()}...")
+
     lat, lon = get_coordinates(location)
-
-    parameters = [
-        "ALLSKY_SFC_SW_DWN", "T2M", "RH2M", "WS10M",
-        "CLRSKY_SFC_SW_DWN", "T2M_MAX", "T2M_MIN"
-    ]
-
-    base_url = "https://power.larc.nasa.gov/api/temporal/daily/point"
+    url = "https://power.larc.nasa.gov/api/temporal/daily/point"
     params = {
-        "parameters": ",".join(parameters),
-        "start": start,
-        "end": end,
+        "start": start_date,
+        "end": end_date,
         "latitude": lat,
         "longitude": lon,
+        "community": "RE",
+        "parameters": ",".join([
+            "ALLSKY_SFC_SW_DWN",  # Global horizontal irradiance (kWh/m²/day)
+            "T2M", "T2M_MAX", "T2M_MIN",
+            "RH2M", "WS10M",
+            "CLRSKY_SFC_SW_DWN"
+        ]),
         "format": "JSON",
-        "community": "RE"
+        "user": "anonymous"
     }
 
-    response = requests.get(base_url, params=params)
+    response = requests.get(url, params=params)
     if response.status_code != 200:
-        print(f"❌ Error {response.status_code}: {response.text}")
+        print(f"❌ Error: Status {response.status_code}")
+        print("🔎 Response text:", response.text)
         return
 
-    json_data = response.json()
-    records = json_data.get("properties", {}).get("parameter", {})
-    if not records:
-        print("⚠️ No data received.")
-        return
-
-    df = pd.DataFrame(records).T
+    data = response.json()["properties"]["parameter"]
+    df = pd.DataFrame(data)
+    df = df.T
     df.index.name = "date"
     df.reset_index(inplace=True)
 
-    output_path = Path("data") / location.lower() / f"nasa_{start[:4]}.csv"
-    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_dir = Path("data") / location.lower() / "raw"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    output_path = output_dir / f"nasa_raw_{start_date}_{end_date}.csv"
     df.to_csv(output_path, index=False)
-    print(f"✅ NASA POWER data saved to {output_path}")
+
+    print(f"✅ NASA data saved to {output_path}")
 
