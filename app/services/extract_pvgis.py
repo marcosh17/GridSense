@@ -4,8 +4,10 @@ from pathlib import Path
 from app.config import get_coordinates
 
 def extract_irradiance(location, startyear=2023, endyear=2023):
-    lat, lon = get_coordinates(location)
+    """Extract hourly global irradiance from PVGIS and save to data/<city>/raw/."""
+    print(f"📡 Extracting solar irradiance data from PVGIS for {location.title()}...")
 
+    lat, lon = get_coordinates(location)
     url = "https://re.jrc.ec.europa.eu/api/v5_2/seriescalc"
     params = {
         "lat": lat,
@@ -14,26 +16,24 @@ def extract_irradiance(location, startyear=2023, endyear=2023):
         "endyear": endyear,
         "outputformat": "json",
         "angle": 35,
-        "aspect": 0,        # 0 = south-facing
-        "pvcalculation": 0  # Only irradiance, no PV simulation
+        "aspect": 0,
+        "pvcalculation": 0
     }
 
-    print(f"📡 Requesting PVGIS irradiance data for {location.title()} ({startyear})...")
     response = requests.get(url, params=params)
-
     if response.status_code != 200:
-        print(f"❌ Error: Unable to fetch data. Status code {response.status_code}")
+        print(f"❌ Error: Status {response.status_code}")
         print("🔎 Response text:", response.text)
         return
 
-    data = response.json()
-    hourly_data = data["outputs"]["hourly"]
-
-    df = pd.DataFrame(hourly_data)
+    data = response.json()["outputs"]["hourly"]
+    df = pd.DataFrame(data)
     df["time"] = pd.to_datetime(df["time"], format="%Y%m%d:%H%M")
     df = df[["time", "G(i)"]].rename(columns={"G(i)": "global_irradiance_W_m2"})
 
-    output_path = Path("data") / location.lower() / f"pvgis_{startyear}.csv"
-    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_dir = Path("data") / location.lower() / "raw"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    output_path = output_dir / f"pvgis_{location.lower()}_{startyear}.csv"
     df.to_csv(output_path, index=False)
-    print(f"✅ Irradiance data successfully saved to {output_path}")
+
+    print(f"✅ Irradiance data saved to {output_path}")
