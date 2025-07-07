@@ -1,6 +1,6 @@
 from app.services.extract_pvgis import extract_irradiance
 from app.services.extract_openmeteo import extract_openmeteo
-from app.services.extract_nasa_power import extract_nasa_power
+from app.services.extract_nasa_power import extract_nasa_data
 from app.config import DEFAULT_LOCATION
 # from app.services.extract_ree import extract_demand_ree  # Uncomment when REE token is available
 
@@ -35,10 +35,10 @@ def run_nasa_extraction():
     """
     Extract historical irradiance and weather data from NASA POWER API.
     """
-    extract_nasa_power(
+    extract_nasa_data(
         location=DEFAULT_LOCATION,
-        start="20200101",
-        end="20201231"
+        start_date="20200101",
+        end_date="20201231"
     )
 
 
