@@ -1,5 +1,6 @@
 from app.services.extract_pvgis import extract_irradiance
 from app.services.extract_openmeteo import extract_openmeteo
+from app.services.extract_nasa_power import extract_nasa_power
 from app.config import DEFAULT_LOCATION
 # from app.services.extract_ree import extract_demand_ree  # Uncomment when REE token is available
 
@@ -12,11 +13,9 @@ def run_pvgis_extraction():
     lat, lon = get_coordinates(DEFAULT_LOCATION)
 
     extract_irradiance(
-        lat=lat,
-        lon=lon,
+        location=DEFAULT_LOCATION,
         startyear=2020,
-        endyear=2020,
-        save_path=f"data/pvgis_{DEFAULT_LOCATION}_2020.csv"
+        endyear=2020
     )
 
 def run_openmeteo_extraction():
@@ -31,10 +30,22 @@ def run_ree_extraction():
     """
     print("⚡ Extracting electricity demand data from REE...")
     # extract_demand_ree()
+    
+def run_nasa_extraction():
+    """
+    Extract historical irradiance and weather data from NASA POWER API.
+    """
+    extract_nasa_power(
+        location=DEFAULT_LOCATION,
+        start="20200101",
+        end="20201231"
+    )
+
 
 if __name__ == "__main__":
     run_pvgis_extraction()
     run_openmeteo_extraction()
+    run_nasa_extraction()
     # run_ree_extraction()  # Enable once ready
 
 # python -m app.run_extractors
