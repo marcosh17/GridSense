@@ -14,7 +14,7 @@ def run_pvgis_extraction():
 
     extract_irradiance(
         location=DEFAULT_LOCATION,
-        startyear=2020,
+        startyear=2005,
         endyear=2020
     )
 
