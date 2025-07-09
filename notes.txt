@@ -1,0 +1,5 @@
+# Ensures project root is in sys.path when run directly
+import sys
+from pathlib import Path
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+

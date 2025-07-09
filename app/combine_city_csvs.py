@@ -1,5 +1,7 @@
 import pandas as pd
 from pathlib import Path
+import sys
+sys.path.append(str(Path(__file__).resolve().parent.parent))  # Añade GridSense/ al sys.path
 from app.config import LOCATIONS
 
 def combine_csvs(source: str):
