@@ -84,4 +84,40 @@ This project follows the [Conventional Commits](https://www.conventionalcommits.
 
 ---
 
+# Open-Meteo Dataset Documentation
+
+This dataset contains hourly atmospheric and solar radiation data from the Open-Meteo historical API for multiple cities in Spain, covering the period **2005–2020**.
+
+## File location
+- Combined file: `data/raw_data/openmeteo_all_cities.csv`
+- Per-city files: `data/{city}/raw/openmeteo_{city}_2005_2020.csv`
+
+## Columns and Units
+
+| Column               | Description                                          | Unit        |
+|----------------------|------------------------------------------------------|-------------|
+| `time`              | Datetime in ISO 8601 format                         | `YYYY-MM-DD HH:MM` |
+| `temperature_2m`    | Air temperature at 2 m height                       | Celsius (°C) |
+| `cloudcover`        | Total cloud cover                                   | %           |
+| `windspeed_10m`     | Wind speed at 10 m height                           | m/s         |
+| `winddirection_10m` | Wind direction at 10 m height (0° = North)          | Degrees (°) |
+| `shortwave_radiation` | Global horizontal irradiance (GHI)               | W/m²        |
+| `direct_radiation`  | Direct normal irradiance (DNI)                      | W/m²        |
+| `diffuse_radiation` | Diffuse horizontal irradiance (DHI)                 | W/m²        |
+| `cloud_cover`       | Alternate cloud cover value                         | %           |
+| `city`              | Lowercase city name                                 | Text        |
+
+## Notes
+- All values are hourly averages.
+- Timezone is automatically adjusted to the location.
+- Data source: [Open-Meteo Archive API](https://open-meteo.com/en/docs)
+
+## Example usage
+```python
+import pandas as pd
+openmeteo = pd.read_csv("data/raw_data/openmeteo_all_cities.csv", parse_dates=['time'])
+
+
+
+
 © GridSense · MIT License
