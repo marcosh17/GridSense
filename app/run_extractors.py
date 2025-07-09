@@ -15,8 +15,8 @@ def run_pvgis_extraction():
             endyear=2020
         )
 
-    # 👉 Uncomment below if you only want the default location:
-    # extract_irradiance(location=DEFAULT_LOCATION, startyear=2005, endyear=2020)
+#     # 👉 Uncomment below if you only want the default location:
+#     # extract_irradiance(location=DEFAULT_LOCATION, startyear=2005, endyear=2020)
 
 def run_openmeteo_extraction():
     """
