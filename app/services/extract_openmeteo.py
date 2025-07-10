@@ -5,7 +5,7 @@ from datetime import date
 from pathlib import Path
 from app.config import get_coordinates
 
-MAX_RETRIES = 10
+MAX_RETRIES = 100
 BASE_DELAY = 2  # Delay in seconds before first retry
 
 def get_atmospheric_data(lat, lon, start, end):
@@ -86,5 +86,6 @@ def extract_openmeteo(location: str, startyear: int, endyear: int):
     output_path = output_dir / f"openmeteo_{location.lower()}_{startyear}_{endyear}.csv"
     full_df.to_csv(output_path, index=False)
     print(f"✅ Open-Meteo data saved to {output_path}")
+
 
 
