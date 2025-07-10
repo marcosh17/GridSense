@@ -5,6 +5,9 @@ from datetime import date
 from pathlib import Path
 from app.config import get_coordinates
 
+MAX_RETRIES = 10
+BASE_DELAY = 2  # Delay in seconds before first retry
+
 def get_atmospheric_data(lat, lon, start, end):
     params = {
         "latitude": lat,
@@ -19,9 +22,7 @@ def get_atmospheric_data(lat, lon, start, end):
         ]),
         "timezone": "auto"
     }
-    response = requests.get("https://archive-api.open-meteo.com/v1/archive", params=params)
-    response.raise_for_status()
-    return pd.DataFrame(response.json().get("hourly", {}))
+    return _make_request(params)
 
 def get_radiation_data(lat, lon, start, end):
     params = {
@@ -37,14 +38,24 @@ def get_radiation_data(lat, lon, start, end):
         ]),
         "timezone": "auto"
     }
-    response = requests.get("https://archive-api.open-meteo.com/v1/archive", params=params)
-    response.raise_for_status()
-    return pd.DataFrame(response.json().get("hourly", {}))
+    return _make_request(params)
+
+def _make_request(params):
+    url = "https://archive-api.open-meteo.com/v1/archive"
+    for attempt in range(1, MAX_RETRIES + 1):
+        try:
+            response = requests.get(url, params=params)
+            response.raise_for_status()
+            return pd.DataFrame(response.json().get("hourly", {}))
+        except requests.exceptions.HTTPError as e:
+            if response.status_code == 429 and attempt < MAX_RETRIES:
+                wait_time = min(BASE_DELAY * (2 ** (attempt - 1)), 300)
+                print(f"⏳ Rate limit reached. Retrying in {wait_time} seconds... (attempt {attempt}/{MAX_RETRIES})")
+                time.sleep(wait_time)
+            else:
+                raise
 
 def extract_openmeteo(location: str, startyear: int, endyear: int):
-    """
-    Extract and save hourly weather and radiation data from Open-Meteo for a given location and year range.
-    """
     lat, lon = get_coordinates(location)
     all_data = []
 
@@ -63,8 +74,6 @@ def extract_openmeteo(location: str, startyear: int, endyear: int):
         except requests.exceptions.HTTPError as e:
             print(f"❌ Error fetching data for {location.title()} ({year}): {e.response.status_code}")
             print("🔎 Response text:", e.response.text)
-        finally:
-            time.sleep(2)  # Espera para evitar el rate limit
 
     if not all_data:
         print(f"⚠️ No data retrieved for {location.title()}")
